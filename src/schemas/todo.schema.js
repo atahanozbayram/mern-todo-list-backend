@@ -10,6 +10,8 @@ const todoValidator = function (todo) {
 	return true; // if program reaches here, we are good to go.
 };
 
+const authorValidator = function (authorId) {};
+
 const TodoSchema = new Schema({
 	_id: mongoose.Types.ObjectId,
 	timestamp: Date,
@@ -19,7 +21,7 @@ const TodoSchema = new Schema({
 		validate: { validator: todoValidator },
 	},
 	completed: { type: Boolean, required: true },
-	author: { type: mongoose.Types.ObjectId, required: true },
+	author: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
 });
 
 module.exports = TodoSchema;
