@@ -13,7 +13,11 @@ const todoValidator = function (todo) {
 const TodoSchema = new Schema({
 	_id: mongoose.Types.ObjectId,
 	timestamp: Date,
-	todo: { type: String, required: true },
+	todo: {
+		type: String,
+		required: true,
+		validate: { validator: todoValidator },
+	},
 	completed: { type: Boolean, required: true },
 	author: { type: mongoose.Types.ObjectId, required: true },
 });
