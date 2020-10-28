@@ -1,6 +1,7 @@
 const { promises } = require('fs');
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
+const userSchema = require('./user.schema');
 
 const todoValidator = function (todo) {
 	if (typeof todo !== 'string') return false; // if the parameter isn't string return false immidiately
@@ -32,7 +33,7 @@ const TodoSchema = new Schema({
 	},
 	completed: { type: Boolean, required: true },
 	author: {
-		type: mongoose.Types.ObjectId,
+		type: userSchema.paths['_id'].instance,
 		required: true,
 		ref: 'User',
 		validate: {
