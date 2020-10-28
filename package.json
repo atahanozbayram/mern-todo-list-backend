@@ -18,6 +18,7 @@
 	"homepage": "https://github.com/atahanozbayram/mern-todo-list-backend#readme",
 	"dependencies": {
 		"express": "^4.17.1",
-		"mongoose": "^5.10.11"
+		"mongoose": "^5.10.11",
+		"mongoose-unique-validator": "^2.0.3"
 	}
 }
