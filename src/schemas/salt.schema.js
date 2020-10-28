@@ -1,9 +1,12 @@
 const mongoose = require('mongoose');
-const { stringify } = require('querystring');
+const uniqueValidator = require('mongoose-unique-validator');
 const { Schema } = mongoose;
 
-const Salt = new Schema({
+const SaltSchema = new Schema({
 	_id: mongoose.Types.ObjectId,
-	content: { type: String, required: true },
+	content: { type: String, required: true, unique: true },
 	user: { type: mongoose.Types.ObjectId, ref: 'User' },
 });
+
+Salt.plugin(uniqueValidator);
+module.exports = SaltSchema;
