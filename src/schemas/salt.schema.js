@@ -8,5 +8,5 @@ const SaltSchema = new Schema({
 	user: { type: mongoose.Types.ObjectId, ref: 'User' },
 });
 
-Salt.plugin(uniqueValidator);
+SaltSchema.plugin(uniqueValidator);
 module.exports = SaltSchema;
