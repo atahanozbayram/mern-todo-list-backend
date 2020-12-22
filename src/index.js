@@ -111,9 +111,36 @@ async function main() {
 		}
 	);
 
-	app.post('/login', [], function (req, res, next) {
-		res.send('This endpoint is yet to be completed.');
-	});
+	app.post(
+		'/login',
+		[
+			check('email')
+				.exists()
+				.bail()
+				.notEmpty()
+				.bail()
+				.withMessage('email field must not be empty')
+				.isEmail()
+				.bail()
+				.withMessage('email field must be valid email'),
+			check('password')
+				.exists()
+				.bail()
+				.notEmpty()
+				.bail()
+				.withMessage('password field must not be empty')
+				.isString()
+				.bail()
+				.withMessage('password field must be string'),
+		],
+		function (req, res, next) {
+			const errors = validationResult(req);
+			if (!errors.isEmpty()) {
+				res.status(400).json({ errors: errors.array() });
+				return;
+			}
+		}
+	);
 
 	const port = 3000;
 	app.listen(port, () => {
