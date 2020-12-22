@@ -1,8 +1,10 @@
+const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const express = require('express');
 const bodyParser = require('body-parser');
 const UserSchema = require('./schemas/user.schema');
 const { body, validationResult, check } = require('express-validator');
+const SaltSchema = require('./schemas/salt.schema');
 
 async function main() {
 	const connection = await mongoose
@@ -77,19 +79,31 @@ async function main() {
 
 			const { firstName, lastName, email, password } = req.body;
 
+			const passwordSalt = bcrypt.genSaltSync(1);
+			const passwordHash = bcrypt.hashSync(password, passwordSalt);
+
 			const UserModel = connection.model('User', UserSchema);
 			const user = new UserModel({
 				_id: new mongoose.Types.ObjectId(),
 				firstName,
 				lastName,
 				email,
-				passwordHash: password,
+				passwordHash,
 			});
 
 			user
 				.save()
 				.then((result) => {
-					res.status(200).json(result);
+					const SaltModel = connection.model('Salt', SaltSchema);
+					const salt = new SaltModel({
+						_id: new mongoose.Types.ObjectId(),
+						content: passwordSalt,
+						user: result._id,
+					});
+
+					salt.save().catch(console.error);
+
+					res.status(200).send('success');
 				})
 				.catch((err) => {
 					res.status(500).send(err);
