@@ -1,3 +1,4 @@
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
 const express = require('express');
@@ -94,15 +95,6 @@ async function main() {
 			user
 				.save()
 				.then((result) => {
-					const SaltModel = connection.model('Salt', SaltSchema);
-					const salt = new SaltModel({
-						_id: new mongoose.Types.ObjectId(),
-						content: passwordSalt,
-						user: result._id,
-					});
-
-					salt.save().catch(console.error);
-
 					res.status(200).send('success');
 				})
 				.catch((err) => {
@@ -139,40 +131,6 @@ async function main() {
 				res.status(400).json({ errors: errors.array() });
 				return;
 			}
-
-			// check if the email exists in database
-			const { email, password } = req.body;
-			const UserModel = connection.model('User', UserSchema);
-
-			UserModel.findOne({ email: email }, function (err, user) {
-				if (user == null) {
-					res.status(400).send("user email doesn't exist");
-					return;
-				}
-
-				// retrieve the salt, then validate the password
-				const SaltModel = connection.model('Salt', SaltSchema);
-				SaltModel.findOne(
-					{ user: user._id },
-					function (err, { content: salt }) {
-						if (err) console.error(err);
-
-						if (salt == null) {
-							res.status(500).send('password salt is not found!');
-							throw Error("database doesn't have the salt");
-						}
-
-						const passwordHash = bcrypt.hashSync(password, salt);
-						// validate password here
-						if (user.passwordHash != passwordHash) {
-							res.status(400).send('password is wrong');
-						}
-
-						// TODO: handle the authentication give some tokens back
-						res.send('all good');
-					}
-				);
-			});
 		}
 	);
 
