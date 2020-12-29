@@ -1,3 +1,4 @@
+require('module-alias/register');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
@@ -5,7 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const UserSchema = require('./schemas/user.schema');
 const { body, validationResult, check } = require('express-validator');
-const SaltSchema = require('./schemas/salt.schema');
+const connection = require('@root/db-connection');
 
 async function main() {
 	const connection = await mongoose
