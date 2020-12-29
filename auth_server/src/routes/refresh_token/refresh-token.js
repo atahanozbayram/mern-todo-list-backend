@@ -86,7 +86,58 @@ async function main() {
 	);
 
 	// check for validity of the refresh token.
-	refreshRoute.get('/validate', [], function (req, res, next) {});
+	refreshRoute.get(
+		'/validate',
+		[
+			check('token')
+				.exists()
+				.bail()
+				.withMessage('token field must exist')
+				.isString()
+				.bail()
+				.withMessage('token field must be string')
+				.notEmpty()
+				.bail()
+				.withMessage('token field must not be empty'),
+		],
+		function (req, res, next) {
+			const errors = validationResult(req);
+			// if any errors happen, send errors with status code 400
+			if (!errors.isEmpty()) {
+				res.status(400).json({ errors: errors.array() });
+				return;
+			}
+
+			const { token } = req.body;
+
+			// if no errors happen, then validate the refresh token
+			const RefreshTokenModel = connection.model(
+				'RefreshToken',
+				RefreshTokenSchema
+			);
+			RefreshTokenModel.findOne({ token: token }, function (err, token) {
+				// if any error happens log it, then send response with status code 500
+				if (err) {
+					console.error(err);
+					res.status(500).send('Error happend inside the server.');
+					return;
+				}
+
+				// if not any token found, send response accordingly
+				if (token == null) {
+					res
+						.status(400)
+						.json({ validity: false, msg: "Token doesn't exist in database." });
+					return;
+				}
+
+				// at this point token should be valid, thus send validity true
+				res
+					.status(200)
+					.json({ validity: true, msg: 'Token is currently valid.' });
+			});
+		}
+	);
 
 	// delete one or all refresh tokens for given user, or token itself.
 	refreshRoute.delete('/delete', [], function (req, res, next) {});
