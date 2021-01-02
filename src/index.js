@@ -1,4 +1,5 @@
-require('module-alias/register');
+require('module-alias/register'); // this line should be on first line whatever happens
+const axios = require('axios').default;
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const mongoose = require('mongoose');
@@ -9,16 +10,6 @@ const { body, validationResult, check } = require('express-validator');
 const connection = require('@root/db-connection');
 
 async function main() {
-	const connection = await mongoose
-		.createConnection('mongodb://localhost:27017', {
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-			useCreateIndex: true,
-		})
-		.catch((error) => {
-			console.error(error);
-		});
-
 	const app = express();
 
 	app.use(
@@ -132,6 +123,34 @@ async function main() {
 				res.status(400).json({ errors: errors.array() });
 				return;
 			}
+
+			const { email, password } = req.body;
+
+			// check if the email and password match
+			const UserModel = connection.model('User', UserSchema);
+			UserModel.findOne({ email: email }, function (err, user) {
+				if (err) {
+					console.error(err);
+					res.status(500).json({
+						errors: [{ msg: 'Unknown error occured in the server.' }],
+					});
+					return; // terminate the function
+				}
+
+				if (user == null) {
+					res.status(400).json({ errors: [{ msg: 'Non existent email.' }] });
+					return;
+				}
+
+				// if program reaches here, that means we have a valid user. Now check for password validity.
+				// this if check if it fails
+				if (bcrypt.compareSync(password, user.passwordHash) == false) {
+					res.status(400).json({ errors: [{ msg: 'Invalid password.' }] });
+					return;
+				}
+
+				// send request to obtain refresh token
+			});
 		}
 	);
 
