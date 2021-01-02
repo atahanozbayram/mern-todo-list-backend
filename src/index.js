@@ -150,6 +150,28 @@ async function main() {
 				}
 
 				// send request to obtain refresh token
+				const axiosRes = await axios({
+					method: 'POST',
+					baseURL: process.env.AUTH_SERVER_IP || 'http://localhost:5000/api',
+					url: 'refreshToken/request',
+					data: {
+						email: email,
+						password: password,
+					},
+				}).catch((axiosErr) => {
+					console.error(axiosErr);
+					res
+						.status(500)
+						.json({ errors: [{ msg: 'some error occured in server side.' }] });
+					return;
+				});
+
+				if (axiosRes == undefined) return;
+
+				res
+					.status(200)
+					.cookie('refreshToken', axiosRes.data.refreshToken)
+					.send();
 			});
 		}
 	);
