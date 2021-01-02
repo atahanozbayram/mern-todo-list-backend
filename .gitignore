@@ -1,4 +1,7 @@
+
+node_modules/
+.vscode/
+
 design-ideas.md
-node_modules
 test.js
 .env
