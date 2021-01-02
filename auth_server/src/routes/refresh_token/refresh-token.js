@@ -1,4 +1,3 @@
-require('dotenv').config();
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const express = require('express');
@@ -58,11 +57,12 @@ async function main() {
 
 				// if the code reaches here, that means we have valid authentication.
 				// generate newrefresh token, save it into database, and send it back to the client.
-				const token = jwt.sign(
-					{ email: email, date: Date.now() },
-					process.env.REFRESH_TOKEN_SECRET,
-					{ algorithm: 'HS256' }
-				);
+				// TODO: fix the code below
+				// const token = jwt.sign(
+				// 	{ email: email, date: Date.now() },
+				// 	REFRESH_TOKEN_SECRET,
+				// 	{ algorithm: 'HS256' }
+				// );
 
 				// create refresh token model
 				const RefreshTokenModel = connection.model(
@@ -140,7 +140,6 @@ async function main() {
 	);
 
 	// delete one or all refresh tokens for given user, or token itself.
-	// TODO: left here
 	refreshRoute.delete(
 		'/delete',
 		[
