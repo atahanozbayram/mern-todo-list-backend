@@ -128,7 +128,7 @@ async function main() {
 
 			// check if the email and password match
 			const UserModel = connection.model('User', UserSchema);
-			UserModel.findOne({ email: email }, function (err, user) {
+			UserModel.findOne({ email: email }, async function (err, user) {
 				if (err) {
 					console.error(err);
 					res.status(500).json({
