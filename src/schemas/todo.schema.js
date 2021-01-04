@@ -32,7 +32,7 @@ const TodoSchema = new Schema({
 		validate: { validator: todoValidator },
 	},
 	completed: { type: Boolean, required: true },
-	author: {
+	user: {
 		type: userSchema.paths['_id'].instance,
 		required: true,
 		ref: 'User',
