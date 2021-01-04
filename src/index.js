@@ -1,6 +1,7 @@
 require('module-alias/register'); // this line should be on first line whatever happens
 const express = require('express');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
 const apiRoute = require('@root/src/routes/api.route');
 
 async function main() {
@@ -12,6 +13,7 @@ async function main() {
 		})
 	);
 	app.use(bodyParser.json());
+	app.use(cookieParser());
 	app.use('/api', apiRoute);
 
 	const port = 3000;
