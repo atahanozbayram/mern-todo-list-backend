@@ -77,14 +77,12 @@ async function main() {
 			user
 				.save()
 				.then((result) => {
-					res
-						.status(200)
-						.json({
-							msg: 'User registered successfully',
-							firstName: firstName,
-							lastName: lastName,
-							email: email,
-						});
+					res.status(200).json({
+						msg: 'User registered successfully',
+						firstName: firstName,
+						lastName: lastName,
+						email: email,
+					});
 				})
 				.catch((err) => {
 					res.status(400).send(err);
@@ -170,6 +168,52 @@ async function main() {
 					.cookie('refreshToken', axiosRes.data.refreshToken)
 					.send();
 			});
+		}
+	);
+
+	userRoute.post(
+		'/logout',
+		[
+			check('logoutAll')
+				.exists()
+				.bail()
+				.withMessage('logoutAll field must exist.')
+				.isBoolean()
+				.bail()
+				.withMessage('logoutAll field must be boolean.'),
+		],
+		async function (req, res, next) {
+			const errors = validationResult(req);
+			if (errors.isEmpty() == false) {
+				res.status(400).json({ errors: errors.array() });
+				return;
+			}
+
+			// check for cookie existense
+			if (req.cookies['refreshToken'] == undefined) {
+				res
+					.status(400)
+					.json({ errors: [{ msg: 'refreshToken cookie is missing.' }] });
+				return;
+			}
+
+			const axiosRes = await axios({
+				method: 'DELETE',
+				baseURL: process.env.AUTH_SERVER_IP || 'http://localhost:5000/api',
+				url: '/refreshToken/delete',
+				data: {
+					token: req.cookies.refreshToken,
+					logoutAll: req.body.logoutAll,
+				},
+			}).catch((axiosErr) => {
+				console.error(axiosErr);
+				res.status(500).json(axiosErr.response.data);
+				return;
+			});
+
+			if (axiosRes == undefined) return;
+
+			res.status(200).clearCookie('refreshToken').json(axiosRes.data);
 		}
 	);
 	module.exports = userRoute;
