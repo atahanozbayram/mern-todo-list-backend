@@ -25,9 +25,6 @@ async function isAuthorized(req, res, next) {
 	}
 
 	if (validAccess == false && refreshToken) {
-		// TODO: delete logging below
-		console.log('this line should not be printed');
-
 		// check for validity of refreshToken
 		const axiosRes = await axios({
 			method: 'GET',
