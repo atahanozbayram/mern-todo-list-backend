@@ -19,6 +19,11 @@ async function isAuthorized(req, res, next) {
 				}
 
 				validAccess = true;
+				req.authorization = {
+					user: {
+						email: decodedAccessToken.email,
+					},
+				};
 				next();
 			}
 		);
@@ -50,6 +55,11 @@ async function isAuthorized(req, res, next) {
 			)
 		);
 
+		req.authorization = {
+			user: {
+				email: decodedRefreshToken.email,
+			},
+		};
 		next();
 	}
 }
