@@ -26,7 +26,7 @@ const authorValidator = async function (userId) {
 const TodoSchema = new Schema({
 	_id: mongoose.Types.ObjectId,
 	timestamp: Date,
-	todo: {
+	text: {
 		type: String,
 		required: true,
 		validate: { validator: todoValidator },
