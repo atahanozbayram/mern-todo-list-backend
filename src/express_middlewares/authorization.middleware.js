@@ -61,7 +61,11 @@ async function isAuthorized(req, res, next) {
 			},
 		};
 		next();
+		return;
 	}
+
+	if (validAccess == false)
+		res.status(401).json({ errors: [{ msg: 'Unauthorized access.' }] });
 }
 
 module.exports = isAuthorized;
