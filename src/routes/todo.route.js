@@ -73,7 +73,9 @@ async function main() {
 						return;
 					}
 
-					res.status(200).json({ todo: todoDoc });
+					res
+						.status(200)
+						.json({ msg: 'Todo added successfully', todo: todoDoc });
 				});
 			});
 		}
@@ -97,18 +99,86 @@ async function main() {
 				return;
 			}
 
-			const TodoModel = connection.model('Todo', TodoSchema);
-			const { id } = req.body;
-			TodoModel.findOneAndDelete({ _id: id }, function (err, todoDoc) {
+			// check for todo's user and the requesting user.
+			// if they are not same don't delete it.
+			const { email: userEmail } = req.authorization.user;
+			const UserModel = connection.model('User', UserSchema);
+
+			UserModel.findOne({ email: userEmail }, function (err, userDoc) {
 				if (err) {
-					res.status(500).json({ errors: [err] });
+					console.error(err);
+					res
+						.status(500)
+						.json({ errors: [{ msg: 'Some error occured on server side.' }] });
 					return;
 				}
-				res.status(200).json({ todo: todoDoc });
+
+				if (userDoc == null) {
+					res
+						.status(400)
+						.json({ errors: [{ msg: "User doesn't exist in database." }] });
+					return;
+				}
+
+				const TodoModel = connection.model('Todo', TodoSchema);
+				const { id } = req.body;
+				TodoModel.findOneAndDelete({ _id: id }, function (err, todoDoc) {
+					if (err) {
+						console.error('error: %o', err);
+						res.status(500).json({ errors: [err] });
+						return;
+					}
+
+					if (todoDoc == null) {
+						console.error('todoDoc == null: %o', todoDoc);
+						res.status(500).json({
+							errors: [{ msg: 'given todo does not exist in database.' }],
+						});
+						return;
+					}
+					// check if the user and todos user id same
+					// TODO: delete loggings below
+					console.log('userDoc._id: %o', userDoc._id);
+					console.log('todoDoc.user: %o', todoDoc.user);
+					if (userDoc._id.equals(todoDoc.user) == false) {
+						res
+							.status(400)
+							.json({ errors: [{ msg: 'Unauthorized to delete given todo' }] });
+						return;
+					}
+
+					res
+						.status(200)
+						.json({ msg: 'todo deleted successfully.', todo: todoDoc });
+				});
 			});
 		}
 	);
-	todoRoute.post('/toggleComplete', [], function (req, res, next) {});
+	todoRoute.post(
+		'/toggleComplete',
+		[
+			check('id')
+				.exists()
+				.bail()
+				.withMessage('id field must exist.')
+				.isMongoId()
+				.bail()
+				.withMessage('id field must be mongo id.'),
+			check('text').isString().bail().withMessage('text field must be text'),
+			check('completed')
+				.isBoolean()
+				.bail()
+				.withMessage('completed field must be boolean.'),
+		],
+		function (req, res, next) {
+			const errors = validationResult(req);
+
+			if (errors.isEmpty() == false) {
+				res.status(400).json({ errors: errors.array() });
+				return;
+			}
+		}
+	);
 
 	module.exports = todoRoute;
 }
