@@ -137,9 +137,6 @@ async function main() {
 						return;
 					}
 					// check if the user and todos user id same
-					// TODO: delete loggings below
-					console.log('userDoc._id: %o', userDoc._id);
-					console.log('todoDoc.user: %o', todoDoc.user);
 					if (userDoc._id.equals(todoDoc.user) == false) {
 						res
 							.status(400)
