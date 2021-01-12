@@ -78,7 +78,36 @@ async function main() {
 			});
 		}
 	);
-	todoRoute.post('/delete', [], function (req, res, next) {});
+	todoRoute.post(
+		'/delete',
+		[
+			check('id')
+				.exists()
+				.bail()
+				.withMessage('id field must exist.')
+				.isMongoId()
+				.bail()
+				.withMessage('id field must be mongo id.'),
+		],
+		function (req, res, next) {
+			const errors = validationResult(req);
+
+			if (errors.isEmpty() == false) {
+				res.status(400).json({ errors: errors.array() });
+				return;
+			}
+
+			const TodoModel = connection.model('Todo', TodoSchema);
+			const { id } = req.body;
+			TodoModel.findOneAndDelete({ _id: id }, function (err, todoDoc) {
+				if (err) {
+					res.status(500).json({ errors: [err] });
+					return;
+				}
+				res.status(200).json({ todo: todoDoc });
+			});
+		}
+	);
 	todoRoute.post('/toggleComplete', [], function (req, res, next) {});
 
 	module.exports = todoRoute;
