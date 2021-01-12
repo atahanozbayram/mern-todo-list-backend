@@ -8,7 +8,7 @@ const TodoSchema = require('@root/src/schemas/todo.schema');
 async function main() {
 	function todoUserMatch(req, res, next) {
 		const errors = validationResult(req);
-		if (errors.isEmpty() == false) {
+		if (errors.isEmpty() === false) {
 			res.status(400).json({ errors: errors.array() });
 			return;
 		}
@@ -25,7 +25,7 @@ async function main() {
 				return;
 			}
 
-			if (userDoc == null) {
+			if (userDoc === null) {
 				res
 					.status(400)
 					.json({ errors: [{ msg: "User doesn't exist in database." }] });
@@ -42,8 +42,8 @@ async function main() {
 					return;
 				}
 
-				if (todoDoc == null) {
-					console.error('todoDoc == null: %o', todoDoc);
+				if (todoDoc === null) {
+					console.error('todoDoc === null: %o', todoDoc);
 					res.status(500).json({
 						errors: [{ msg: 'Given todo does not exists in database.' }],
 					});
@@ -51,7 +51,7 @@ async function main() {
 				}
 
 				// check if the user and todos user id same
-				if (userDoc._id.equals(todoDoc.user) == false) {
+				if (userDoc._id.equals(todoDoc.user) === false) {
 					res.status(400).json({
 						errors: [{ msg: 'Unauthorized to delete given todo.' }],
 					});
@@ -87,7 +87,7 @@ async function main() {
 		function (req, res, next) {
 			const errors = validationResult(req);
 
-			if (errors.isEmpty() == false) {
+			if (errors.isEmpty() === false) {
 				res.status(400).json({ errors: errors.array() });
 				return;
 			}
@@ -153,7 +153,7 @@ async function main() {
 		function (req, res, next) {
 			const errors = validationResult(req);
 
-			if (errors.isEmpty() == false) {
+			if (errors.isEmpty() === false) {
 				res.status(400).json({ errors: errors.array() });
 				return;
 			}
@@ -167,8 +167,8 @@ async function main() {
 					return;
 				}
 
-				if (todoDoc == null) {
-					console.error('todoDoc == null: %o', todoDoc);
+				if (todoDoc === null) {
+					console.error('todoDoc === null: %o', todoDoc);
 					res.status(500).json({
 						errors: [{ msg: 'given todo does not exist in database.' }],
 					});
@@ -196,7 +196,7 @@ async function main() {
 		function (req, res, next) {
 			const errors = validationResult(req);
 
-			if (errors.isEmpty() == false) {
+			if (errors.isEmpty() === false) {
 				res.status(400).json({ errors: errors.array() });
 				return;
 			}
@@ -212,7 +212,7 @@ async function main() {
 					return;
 				}
 
-				if (todoDoc == null) {
+				if (todoDoc === null) {
 					res.status(400).json({ errors: [{ msg: 'Todo is non existent.' }] });
 					return;
 				}

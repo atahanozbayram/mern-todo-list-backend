@@ -29,7 +29,7 @@ async function isAuthorized(req, res, next) {
 		);
 	}
 
-	if (validAccess == false && refreshToken) {
+	if (validAccess === false && refreshToken) {
 		// check for validity of refreshToken
 		const axiosRes = await axios({
 			method: 'GET',
@@ -43,7 +43,7 @@ async function isAuthorized(req, res, next) {
 			res.status(401).json({ errors: [{ msg: 'Unauthorized access' }] });
 		});
 
-		if (axiosRes == undefined) return;
+		if (axiosRes === undefined) return;
 
 		const decodedRefreshToken = jwt.decode(refreshToken);
 		res.cookie(
@@ -64,7 +64,7 @@ async function isAuthorized(req, res, next) {
 		return;
 	}
 
-	if (validAccess == false)
+	if (validAccess === false)
 		res.status(401).json({ errors: [{ msg: 'Unauthorized access.' }] });
 }
 

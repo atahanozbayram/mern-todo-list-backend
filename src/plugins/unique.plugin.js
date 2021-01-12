@@ -49,7 +49,7 @@ const plugin = function (schema, options) {
 			each(paths, (pathName) => {
 				// Chose error message
 				const pathMessage =
-					typeof indexOptions.unique == 'string'
+					typeof indexOptions.unique === 'string'
 						? indexOptions.unique
 						: message;
 

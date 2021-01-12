@@ -132,14 +132,14 @@ async function main() {
 					return; // terminate the function
 				}
 
-				if (user == null) {
+				if (user === null) {
 					res.status(400).json({ errors: [{ msg: 'Non existent email.' }] });
 					return;
 				}
 
 				// if program reaches here, that means we have a valid user. Now check for password validity.
 				// this if check if it fails
-				if (bcrypt.compareSync(password, user.passwordHash) == false) {
+				if (bcrypt.compareSync(password, user.passwordHash) === false) {
 					res.status(400).json({ errors: [{ msg: 'Invalid password.' }] });
 					return;
 				}
@@ -161,7 +161,7 @@ async function main() {
 					return;
 				});
 
-				if (axiosRes == undefined) return;
+				if (axiosRes === undefined) return;
 
 				res
 					.status(200)
@@ -184,13 +184,13 @@ async function main() {
 		],
 		async function (req, res, next) {
 			const errors = validationResult(req);
-			if (errors.isEmpty() == false) {
+			if (errors.isEmpty() === false) {
 				res.status(400).json({ errors: errors.array() });
 				return;
 			}
 
 			// check for cookie existense
-			if (req.cookies['refreshToken'] == undefined) {
+			if (req.cookies['refreshToken'] === undefined) {
 				res
 					.status(400)
 					.json({ errors: [{ msg: 'refreshToken cookie is missing.' }] });
@@ -211,7 +211,7 @@ async function main() {
 				return;
 			});
 
-			if (axiosRes == undefined) return;
+			if (axiosRes === undefined) return;
 
 			res.status(200).clearCookie('refreshToken').json(axiosRes.data);
 		}
