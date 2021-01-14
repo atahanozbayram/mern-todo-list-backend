@@ -14,6 +14,9 @@ const connection = mongoose.createConnection(connectionString, {
 	useNewUrlParser: true,
 	useUnifiedTopology: true,
 	useCreateIndex: true,
+	autoCreate: process.env.NODE_ENV === 'production' ? false : true,
+	autoIndex: process.env.NODE_ENV === 'production' ? false : true,
+	connectTimeoutMS: 5000,
 });
 
 connection.catch(console.error);
