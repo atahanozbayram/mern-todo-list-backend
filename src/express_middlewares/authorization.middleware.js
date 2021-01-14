@@ -2,7 +2,7 @@ require('dotenv').config();
 const axios = require('axios').default;
 const jwt = require('jsonwebtoken');
 
-async function isAuthorized(req, res, next) {
+const isAuthorized = async function (req, res, next) {
 	const { accessToken, refreshToken } = req.cookies;
 	let validAccess = false;
 
@@ -64,6 +64,6 @@ async function isAuthorized(req, res, next) {
 
 	if (validAccess === false)
 		res.status(401).json({ errors: [{ msg: 'Unauthorized access.' }] });
-}
+};
 
 module.exports = isAuthorized;
