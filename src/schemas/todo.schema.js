@@ -1,4 +1,3 @@
-const { promises } = require('fs');
 const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const userSchema = require('./user.schema');
@@ -29,7 +28,12 @@ const TodoSchema = new Schema({
 	text: {
 		type: String,
 		required: true,
-		validate: { validator: todoValidator },
+		validate: {
+			validator: todoValidator,
+			message: function () {
+				return 'todo validation failed.';
+			},
+		},
 	},
 	completed: { type: Boolean, required: true },
 	user: {
@@ -39,7 +43,7 @@ const TodoSchema = new Schema({
 		validate: {
 			validator: authorValidator,
 			message: function () {
-				return 'author validation failed';
+				return 'author validation failed.';
 			},
 		},
 	},
