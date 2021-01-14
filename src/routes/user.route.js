@@ -6,11 +6,88 @@ const mongoose = require('mongoose');
 const { check, validationResult } = require('express-validator');
 const UserSchema = require('@root/src/schemas/user.schema');
 const connection = require('@root/db-connection');
+const dynamicValMsg = require('./validation');
 
 const routes = function () {
 	const userRoute = express.Router();
 	const validations = {};
 	const exp = {};
+
+	validations.register = [
+		check('firstName')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.isString()
+			.bail()
+			.withMessage(dynamicValMsg.isType('string'))
+			.isLength({ max: 40 })
+			.bail()
+			.withMessage(dynamicValMsg.isLength({ max: 40 })),
+		check('lastName')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.isString()
+			.bail()
+			.withMessage(dynamicValMsg.isType('string'))
+			.isLength({ max: 40 })
+			.bail()
+			.withMessage(dynamicValMsg.isLength({ max: 40 })),
+		check('email')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.isEmail()
+			.bail()
+			.withMessage(dynamicValMsg.isEmail())
+			.isLength({ max: 253 })
+			.bail()
+			.withMessage(dynamicValMsg.isLength({ max: 253 })),
+		check('password')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.bail()
+			.isString()
+			.withMessage(dynamicValMsg.isType('string'))
+			.isLength({ min: 8 })
+			.bail()
+			.withMessage(dynamicValMsg.isLength({ min: 8 })),
+	];
+
+	validations.login = [
+		check('email')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.notEmpty()
+			.bail()
+			.withMessage(dynamicValMsg.notEmpty())
+			.isEmail()
+			.bail()
+			.withMessage(dynamicValMsg.isEmail()),
+		check('password')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.notEmpty()
+			.bail()
+			.withMessage(dynamicValMsg.notEmpty())
+			.isString()
+			.bail()
+			.withMessage(dynamicValMsg.isType('string')),
+	];
+
+	validations.logout = [
+		check('logoutAll')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.isBoolean()
+			.bail()
+			.withMessage(dynamicValMsg.isType('boolean')),
+	];
 
 	exp.register = function (req, res, next) {
 		const errors = validationResult(req);
@@ -137,79 +214,6 @@ const routes = function () {
 		res.status(200).clearCookie('refreshToken').json(axiosRes.data);
 	};
 
-	validations.register = [
-		check('firstName')
-			.exists()
-			.bail()
-			.withMessage('firstName field must be not empty')
-			.isString()
-			.bail()
-			.withMessage('firstName field must be string')
-			.isLength({ max: 39 })
-			.bail()
-			.withMessage('firstName field cannot be longer than 39 characters'),
-		check('lastName')
-			.exists()
-			.bail()
-			.withMessage('lastName field cannot be empty')
-			.isString()
-			.bail()
-			.withMessage('lastName field must be string')
-			.isLength({ max: 39 })
-			.bail()
-			.withMessage('lastName field cannot be longer than 39 characters'),
-		check('email')
-			.exists()
-			.bail()
-			.withMessage('email field must be not empty')
-			.isEmail()
-			.bail()
-			.withMessage('email field must be valid email address')
-			.isLength({ max: 253 })
-			.bail()
-			.withMessage('email field cannot be longer than 253 characters'),
-		check('password')
-			.exists()
-			.bail()
-			.withMessage('password field must be not empty')
-			.bail()
-			.isString()
-			.withMessage('password field must be string')
-			.isLength({ min: 7 })
-			.bail()
-			.withMessage('password field must be at least 7 characters'),
-	];
-
-	validations.login = [
-		check('email')
-			.exists()
-			.bail()
-			.notEmpty()
-			.bail()
-			.withMessage('email field must not be empty')
-			.isEmail()
-			.bail()
-			.withMessage('email field must be valid email'),
-		check('password')
-			.exists()
-			.bail()
-			.notEmpty()
-			.bail()
-			.withMessage('password field must not be empty')
-			.isString()
-			.bail()
-			.withMessage('password field must be string'),
-	];
-
-	validations.logout = [
-		check('logoutAll')
-			.exists()
-			.bail()
-			.withMessage('logoutAll field must exist.')
-			.isBoolean()
-			.bail()
-			.withMessage('logoutAll field must be boolean.'),
-	];
 	userRoute.post('/register', validations.register, exp.register);
 	userRoute.post('/login', validations.login, exp.login);
 	userRoute.post('/logout', validations.logout, exp.logout);
