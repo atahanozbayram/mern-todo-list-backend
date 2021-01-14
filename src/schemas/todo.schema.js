@@ -45,17 +45,6 @@ userValidators.existenceVal = function (userId) {
 	});
 };
 
-const authorValidator = async function (userId) {
-	// check if userId is falsy value if so return false
-	if (!userId) return Promise.resolve(false);
-
-	// check if the user exists in the database
-	const result = await this.model('User').findOne({ _id: userId }).exec();
-
-	if (result !== null) return Promise.resolve(true);
-	else return Promise.resolve(false);
-};
-
 const TodoSchema = new Schema({
 	_id: mongoose.Types.ObjectId,
 	timestamp: Date,
