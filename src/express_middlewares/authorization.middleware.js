@@ -1,8 +1,6 @@
 require('dotenv').config();
-const express = require('express');
 const axios = require('axios').default;
 const jwt = require('jsonwebtoken');
-const connection = require('@root/db-connection');
 
 async function isAuthorized(req, res, next) {
 	const { accessToken, refreshToken } = req.cookies;
