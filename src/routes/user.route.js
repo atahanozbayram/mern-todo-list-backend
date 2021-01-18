@@ -7,6 +7,7 @@ const { check, validationResult } = require('express-validator');
 const UserSchema = require('@root/src/schemas/user.schema');
 const connection = require('@root/db-connection');
 const dynamicValMsg = require('./validation');
+const errorMsgTmp = require('./error');
 
 const routes = function () {
 	const userRoute = express.Router();
@@ -140,7 +141,7 @@ const routes = function () {
 			if (err) {
 				console.error(err);
 				res.status(500).json({
-					errors: [{ msg: 'Unknown error occured in the server.' }],
+					errors: [{ msg: errorMsgTmp.general.serverSideError() }],
 				});
 				return; // terminate the function
 			}
@@ -170,13 +171,16 @@ const routes = function () {
 				console.error(axiosErr);
 				res
 					.status(500)
-					.json({ errors: [{ msg: 'some error occured in server side.' }] });
+					.json({ errors: [{ msg: errorMsgTmp.general.serverSideError() }] });
 				return;
 			});
 
 			if (axiosRes === undefined) return;
 
-			res.status(200).cookie('refreshToken', axiosRes.data.refreshToken).send();
+			res
+				.status(200)
+				.cookie('refreshToken', axiosRes.data.refreshToken)
+				.json({ msg: 'logged in successfully.' });
 		});
 	};
 
@@ -195,9 +199,12 @@ const routes = function () {
 			return;
 		}
 
+		const auth_host = process.env.AUTH_SERVER_HOST || 'http://localhost';
+		const auth_port = process.env.AUTH_SERVER_PORT || 5000;
+
 		const axiosRes = await axios({
 			method: 'DELETE',
-			baseURL: process.env.AUTH_SERVER_IP || 'http://localhost:5000/api',
+			baseURL: `${auth_host}:${auth_port}/api`,
 			url: '/refreshToken/delete',
 			data: {
 				token: req.cookies.refreshToken,
@@ -205,13 +212,18 @@ const routes = function () {
 			},
 		}).catch((axiosErr) => {
 			console.error(axiosErr);
-			res.status(500).json(axiosErr.response.data);
+			res
+				.status(500)
+				.json({ msg: 'auth server error.', data: axiosErr.response.data });
 			return;
 		});
 
 		if (axiosRes === undefined) return;
 
-		res.status(200).clearCookie('refreshToken').json(axiosRes.data);
+		res
+			.status(200)
+			.clearCookie('refreshToken')
+			.json({ msg: 'logged out successfully.', data: axiosRes.data });
 	};
 
 	userRoute.post('/register', validations.register, exp.register);

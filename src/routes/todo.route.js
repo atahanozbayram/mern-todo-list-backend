@@ -6,6 +6,7 @@ const connection = require('@root/db-connection');
 const UserSchema = require('@root/src/schemas/user.schema');
 const TodoSchema = require('@root/src/schemas/todo.schema');
 const dynamicValMsg = require('./validation');
+const errorMsgTemp = require('./error');
 
 const routes = function () {
 	const todoRoute = express.Router();
@@ -27,7 +28,7 @@ const routes = function () {
 				console.error(err);
 				res
 					.status(500)
-					.json({ errors: [{ msg: 'Some error occured on server side.' }] });
+					.json({ errors: [{ msg: errorMsgTemp.general.serverSideError() }] });
 				return;
 			}
 
@@ -130,7 +131,7 @@ const routes = function () {
 				console.error(err);
 				res
 					.status(500)
-					.json({ errors: [{ msg: 'some error occured on server side.' }] });
+					.json({ errors: [{ msg: errorMsgTemp.general.serverSideError() }] });
 				return;
 			}
 
@@ -154,7 +155,7 @@ const routes = function () {
 				if (err) {
 					console.error(err);
 					res.status(500).json({
-						errors: [{ msg: 'Some error occured on server side.' }],
+						errors: [{ msg: errorMsgTemp.general.serverSideError() }],
 					});
 					return;
 				}
@@ -210,7 +211,7 @@ const routes = function () {
 				console.err(err);
 				res
 					.status(500)
-					.json({ errors: [{ msg: 'Some error occured on server side.' }] });
+					.json({ errors: [{ msg: errorMsgTemp.general.serverSideError() }] });
 				return;
 			}
 
