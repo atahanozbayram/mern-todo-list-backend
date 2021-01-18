@@ -5,10 +5,10 @@ errorMessageTemplates.authentication = {};
 
 errorMessageTemplates.general.serverSideError = function (error) {
 	if (!error) {
-		return 'error';
+		return 'some error occured on server side.';
 	}
 
-	return 'Some error occured on server side.';
+	return error;
 };
 
 errorMessageTemplates.authentication.refreshTokenMissing = function () {
