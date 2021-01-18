@@ -158,10 +158,13 @@ const routes = function () {
 				return;
 			}
 
+			const auth_host = process.env.AUTH_SERVER_HOST || 'http://localhost';
+			const auth_port = process.env.AUTH_SERVER_PORT || 5000;
+
 			// send request to obtain refresh token
 			const axiosRes = await axios({
 				method: 'POST',
-				baseURL: process.env.AUTH_SERVER_IP || 'http://localhost:5000/api',
+				baseURL: `${auth_host}:${auth_port}/api`,
 				url: 'refreshToken/request',
 				data: {
 					email: email,
