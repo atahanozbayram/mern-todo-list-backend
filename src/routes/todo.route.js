@@ -5,6 +5,8 @@ const { check, validationResult } = require('express-validator');
 const connection = require('@root/db-connection');
 const UserSchema = require('@root/src/schemas/user.schema');
 const TodoSchema = require('@root/src/schemas/todo.schema');
+const dynamicValMsg = require('./validation');
+const errorMsgTemp = require('./error');
 
 const routes = function () {
 	const todoRoute = express.Router();
@@ -26,7 +28,7 @@ const routes = function () {
 				console.error(err);
 				res
 					.status(500)
-					.json({ errors: [{ msg: 'Some error occured on server side.' }] });
+					.json({ errors: [{ msg: errorMsgTemp.general.serverSideError() }] });
 				return;
 			}
 
@@ -73,27 +75,30 @@ const routes = function () {
 		check('text')
 			.exists()
 			.bail()
-			.withMessage('text field must exist')
+			.withMessage(dynamicValMsg.exists())
 			.isString()
 			.bail()
-			.withMessage('text field must be string'),
+			.withMessage(dynamicValMsg.isType('string'))
+			.notEmpty()
+			.bail()
+			.withMessage(dynamicValMsg.notEmpty()),
 		check('completed')
 			.exists()
 			.bail()
-			.withMessage('completed field must exist')
+			.withMessage(dynamicValMsg.exists())
 			.isBoolean()
 			.bail()
-			.withMessage('completed field must be boolean'),
+			.withMessage(dynamicValMsg.isType('boolean')),
 	];
 
 	validations.delete = [
 		check('id')
 			.exists()
 			.bail()
-			.withMessage('id field must exist.')
+			.withMessage(dynamicValMsg.exists())
 			.isMongoId()
 			.bail()
-			.withMessage('id field must be mongo id.'),
+			.withMessage(dynamicValMsg.isType(typeof mongoose.Types.ObjectId)),
 		todoUserMatch,
 	];
 
@@ -101,10 +106,10 @@ const routes = function () {
 		check('id')
 			.exists()
 			.bail()
-			.withMessage('id field must exist.')
+			.withMessage(dynamicValMsg.exists())
 			.isMongoId()
 			.bail()
-			.withMessage('id field must be mongo id.'),
+			.withMessage(dynamicValMsg.isType(typeof mongoose.Types.ObjectId)),
 		todoUserMatch,
 	];
 
@@ -126,7 +131,7 @@ const routes = function () {
 				console.error(err);
 				res
 					.status(500)
-					.json({ errors: [{ msg: 'some error occured on server side.' }] });
+					.json({ errors: [{ msg: errorMsgTemp.general.serverSideError() }] });
 				return;
 			}
 
@@ -150,7 +155,7 @@ const routes = function () {
 				if (err) {
 					console.error(err);
 					res.status(500).json({
-						errors: [{ msg: 'Some error occured on server side.' }],
+						errors: [{ msg: errorMsgTemp.general.serverSideError() }],
 					});
 					return;
 				}
@@ -206,7 +211,7 @@ const routes = function () {
 				console.err(err);
 				res
 					.status(500)
-					.json({ errors: [{ msg: 'Some error occured on server side.' }] });
+					.json({ errors: [{ msg: errorMsgTemp.general.serverSideError() }] });
 				return;
 			}
 

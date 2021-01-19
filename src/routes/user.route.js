@@ -6,11 +6,89 @@ const mongoose = require('mongoose');
 const { check, validationResult } = require('express-validator');
 const UserSchema = require('@root/src/schemas/user.schema');
 const connection = require('@root/db-connection');
+const dynamicValMsg = require('./validation');
+const errorMsgTmp = require('./error');
 
 const routes = function () {
 	const userRoute = express.Router();
 	const validations = {};
 	const exp = {};
+
+	validations.register = [
+		check('firstName')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.isString()
+			.bail()
+			.withMessage(dynamicValMsg.isType('string'))
+			.isLength({ max: 40 })
+			.bail()
+			.withMessage(dynamicValMsg.isLength({ max: 40 })),
+		check('lastName')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.isString()
+			.bail()
+			.withMessage(dynamicValMsg.isType('string'))
+			.isLength({ max: 40 })
+			.bail()
+			.withMessage(dynamicValMsg.isLength({ max: 40 })),
+		check('email')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.isEmail()
+			.bail()
+			.withMessage(dynamicValMsg.isEmail())
+			.isLength({ max: 253 })
+			.bail()
+			.withMessage(dynamicValMsg.isLength({ max: 253 })),
+		check('password')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.bail()
+			.isString()
+			.withMessage(dynamicValMsg.isType('string'))
+			.isLength({ min: 8 })
+			.bail()
+			.withMessage(dynamicValMsg.isLength({ min: 8 })),
+	];
+
+	validations.login = [
+		check('email')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.notEmpty()
+			.bail()
+			.withMessage(dynamicValMsg.notEmpty())
+			.isEmail()
+			.bail()
+			.withMessage(dynamicValMsg.isEmail()),
+		check('password')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.notEmpty()
+			.bail()
+			.withMessage(dynamicValMsg.notEmpty())
+			.isString()
+			.bail()
+			.withMessage(dynamicValMsg.isType('string')),
+	];
+
+	validations.logout = [
+		check('logoutAll')
+			.exists()
+			.bail()
+			.withMessage(dynamicValMsg.exists())
+			.isBoolean()
+			.bail()
+			.withMessage(dynamicValMsg.isType('boolean')),
+	];
 
 	exp.register = function (req, res, next) {
 		const errors = validationResult(req);
@@ -63,7 +141,7 @@ const routes = function () {
 			if (err) {
 				console.error(err);
 				res.status(500).json({
-					errors: [{ msg: 'Unknown error occured in the server.' }],
+					errors: [{ msg: errorMsgTmp.general.serverSideError() }],
 				});
 				return; // terminate the function
 			}
@@ -80,10 +158,13 @@ const routes = function () {
 				return;
 			}
 
+			const auth_host = process.env.AUTH_SERVER_HOST || 'http://localhost';
+			const auth_port = process.env.AUTH_SERVER_PORT || 5000;
+
 			// send request to obtain refresh token
 			const axiosRes = await axios({
 				method: 'POST',
-				baseURL: process.env.AUTH_SERVER_IP || 'http://localhost:5000/api',
+				baseURL: `${auth_host}:${auth_port}/api`,
 				url: 'refreshToken/request',
 				data: {
 					email: email,
@@ -93,13 +174,16 @@ const routes = function () {
 				console.error(axiosErr);
 				res
 					.status(500)
-					.json({ errors: [{ msg: 'some error occured in server side.' }] });
+					.json({ errors: [{ msg: errorMsgTmp.general.serverSideError() }] });
 				return;
 			});
 
 			if (axiosRes === undefined) return;
 
-			res.status(200).cookie('refreshToken', axiosRes.data.refreshToken).send();
+			res
+				.status(200)
+				.cookie('refreshToken', axiosRes.data.refreshToken)
+				.json({ msg: 'logged in successfully.' });
 		});
 	};
 
@@ -118,9 +202,12 @@ const routes = function () {
 			return;
 		}
 
+		const auth_host = process.env.AUTH_SERVER_HOST || 'http://localhost';
+		const auth_port = process.env.AUTH_SERVER_PORT || 5000;
+
 		const axiosRes = await axios({
 			method: 'DELETE',
-			baseURL: process.env.AUTH_SERVER_IP || 'http://localhost:5000/api',
+			baseURL: `${auth_host}:${auth_port}/api`,
 			url: '/refreshToken/delete',
 			data: {
 				token: req.cookies.refreshToken,
@@ -128,88 +215,20 @@ const routes = function () {
 			},
 		}).catch((axiosErr) => {
 			console.error(axiosErr);
-			res.status(500).json(axiosErr.response.data);
+			res
+				.status(500)
+				.json({ msg: 'auth server error.', data: axiosErr.response.data });
 			return;
 		});
 
 		if (axiosRes === undefined) return;
 
-		res.status(200).clearCookie('refreshToken').json(axiosRes.data);
+		res
+			.status(200)
+			.clearCookie('refreshToken')
+			.json({ msg: 'logged out successfully.', data: axiosRes.data });
 	};
 
-	validations.register = [
-		check('firstName')
-			.exists()
-			.bail()
-			.withMessage('firstName field must be not empty')
-			.isString()
-			.bail()
-			.withMessage('firstName field must be string')
-			.isLength({ max: 39 })
-			.bail()
-			.withMessage('firstName field cannot be longer than 39 characters'),
-		check('lastName')
-			.exists()
-			.bail()
-			.withMessage('lastName field cannot be empty')
-			.isString()
-			.bail()
-			.withMessage('lastName field must be string')
-			.isLength({ max: 39 })
-			.bail()
-			.withMessage('lastName field cannot be longer than 39 characters'),
-		check('email')
-			.exists()
-			.bail()
-			.withMessage('email field must be not empty')
-			.isEmail()
-			.bail()
-			.withMessage('email field must be valid email address')
-			.isLength({ max: 253 })
-			.bail()
-			.withMessage('email field cannot be longer than 253 characters'),
-		check('password')
-			.exists()
-			.bail()
-			.withMessage('password field must be not empty')
-			.bail()
-			.isString()
-			.withMessage('password field must be string')
-			.isLength({ min: 7 })
-			.bail()
-			.withMessage('password field must be at least 7 characters'),
-	];
-
-	validations.login = [
-		check('email')
-			.exists()
-			.bail()
-			.notEmpty()
-			.bail()
-			.withMessage('email field must not be empty')
-			.isEmail()
-			.bail()
-			.withMessage('email field must be valid email'),
-		check('password')
-			.exists()
-			.bail()
-			.notEmpty()
-			.bail()
-			.withMessage('password field must not be empty')
-			.isString()
-			.bail()
-			.withMessage('password field must be string'),
-	];
-
-	validations.logout = [
-		check('logoutAll')
-			.exists()
-			.bail()
-			.withMessage('logoutAll field must exist.')
-			.isBoolean()
-			.bail()
-			.withMessage('logoutAll field must be boolean.'),
-	];
 	userRoute.post('/register', validations.register, exp.register);
 	userRoute.post('/login', validations.login, exp.login);
 	userRoute.post('/logout', validations.logout, exp.logout);
