@@ -182,7 +182,11 @@ const routes = function () {
 
 			res
 				.status(200)
-				.cookie('refreshToken', axiosRes.data.refreshToken)
+				.cookie('refreshToken', axiosRes.data.refreshToken, {
+					sameSite: 'none',
+					httpOnly: false,
+					secure: true,
+				})
 				.json({ msg: 'logged in successfully.' });
 		});
 	};
