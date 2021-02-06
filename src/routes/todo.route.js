@@ -89,6 +89,7 @@ const routes = function () {
 			.isBoolean()
 			.bail()
 			.withMessage(dynamicValMsg.isType('boolean')),
+		todoUserMatch,
 	];
 
 	validations.delete = [
@@ -227,6 +228,7 @@ const routes = function () {
 		});
 	};
 
+	todoRoute.post('/get'); // TODO: complete this
 	todoRoute.post('/add', validations.add, exp.add);
 	todoRoute.post('/delete', validations.delete, exp.delete);
 	todoRoute.post(
