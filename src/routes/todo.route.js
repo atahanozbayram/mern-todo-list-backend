@@ -13,6 +13,13 @@ const routes = function () {
 	const validations = {};
 	const exp = {};
 
+	const maxPageCounter = function (docCount, perPage) {
+		let maxPages = Math.floor(docCount / perPage);
+		maxPages = maxPages % perPage !== 0 ? maxPages + 1 : maxPages;
+
+		return maxPages;
+	};
+
 	const todoUserMatch = function (req, res, next) {
 		const errors = validationResult(req);
 		if (errors.isEmpty() === false) {
@@ -71,6 +78,14 @@ const routes = function () {
 		});
 	};
 
+	validations.get = [
+		check('page')
+			.if(check('page').exists())
+			.isNumeric()
+			.bail()
+			.withMessage(dynamicValMsg.isType('number')),
+	];
+
 	validations.add = [
 		check('text')
 			.exists()
@@ -89,7 +104,6 @@ const routes = function () {
 			.isBoolean()
 			.bail()
 			.withMessage(dynamicValMsg.isType('boolean')),
-		todoUserMatch,
 	];
 
 	validations.delete = [
@@ -113,6 +127,84 @@ const routes = function () {
 			.withMessage(dynamicValMsg.isType(typeof mongoose.Types.ObjectId)),
 		todoUserMatch,
 	];
+
+	exp.get = function (req, res, next) {
+		const { id } = req.authorization.user;
+		const { page } = req.query;
+
+		const perPage = 10;
+
+		const TodoModel = connection.model('Todo', TodoSchema);
+
+		if (page === undefined) {
+			TodoModel.find({ user: id }, function (err, docs) {
+				if (err) {
+					console.error(err);
+					res.status(500).json({
+						errors: [{ msg: errorMsgTemp.general.serverSideError() }],
+					});
+					return;
+				}
+
+				if (docs.length === 0) {
+					res.status(500).json({ errors: [{ msg: 'not any todo found.' }] });
+					return;
+				}
+
+				TodoModel.countDocuments({ user: id }, function (err, docCount) {
+					if (err) {
+						console.error('estimatedDocumentCount error: %o', err);
+						res.status(500).json({
+							errors: [{ msg: errorMsgTemp.general.serverSideError() }],
+						});
+						return;
+					}
+
+					const maxPages = maxPageCounter(docCount, perPage);
+
+					res.status(200).json({ todos: docs, maxPages: maxPages });
+				});
+			});
+			return;
+		}
+
+		// check whether the page number is not greater than maximum it could be.
+		// If it's greater, then send back error.
+		TodoModel.countDocuments({ user: id }, function (err, docCount) {
+			if (err) {
+				console.error('estimatedDocumentCount error: %o', err);
+				res
+					.status(500)
+					.json({ errors: [{ msg: errorMsgTemp.general.serverSideError() }] });
+				return;
+			}
+
+			const maxPages = maxPageCounter(docCount, perPage);
+
+			if (page > maxPages) {
+				res
+					.status(400)
+					.json({ errors: [{ msg: 'page exceeds maximum available pages.' }] });
+				return;
+			}
+
+			TodoModel.find({ user: id })
+				.limit(perPage)
+				.skip(perPage * page)
+				.exec(function (err, todoDocs) {
+					if (err) {
+						console.error('error in TodoModel find: %o', err);
+						res.status(500).json({
+							errors: [{ msg: errorMsgTemp.general.serverSideError() }],
+						});
+						return;
+					}
+
+					res.status(200).json({ todos: todoDocs, maxPages: maxPages });
+					return;
+				});
+		});
+	};
 
 	exp.add = function (req, res, next) {
 		const errors = validationResult(req);
@@ -228,7 +320,7 @@ const routes = function () {
 		});
 	};
 
-	todoRoute.post('/get'); // TODO: complete this
+	todoRoute.get('/get', validations.get, exp.get);
 	todoRoute.post('/add', validations.add, exp.add);
 	todoRoute.post('/delete', validations.delete, exp.delete);
 	todoRoute.post(
