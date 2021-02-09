@@ -20,6 +20,7 @@ const isAuthorized = async function (req, res, next) {
 				req.authorization = {
 					user: {
 						email: decodedAccessToken.email,
+						id: decodedAccessToken.user_id,
 					},
 				};
 				next();
@@ -47,15 +48,25 @@ const isAuthorized = async function (req, res, next) {
 		res.cookie(
 			'accessToken',
 			jwt.sign(
-				{ email: decodedRefreshToken.email, date: Date.now() },
+				{
+					email: decodedRefreshToken.email,
+					user_id: decodedRefreshToken.user_id,
+					date: Date.now(),
+				},
 				process.env.ACCESS_TOKEN_SECRET,
 				{ algorithm: 'HS256' }
-			)
+			),
+			{
+				sameSite: 'none',
+				httpOnly: false,
+				secure: true,
+			}
 		);
 
 		req.authorization = {
 			user: {
 				email: decodedRefreshToken.email,
+				id: decodedRefreshToken.user_id,
 			},
 		};
 		next();
