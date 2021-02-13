@@ -15,7 +15,6 @@ const routes = function () {
 
 	const maxPageCounter = function (docCount, perPage) {
 		let maxPages = Math.floor(docCount / perPage);
-		maxPages = maxPages % perPage !== 0 ? maxPages + 1 : maxPages;
 
 		return maxPages;
 	};
