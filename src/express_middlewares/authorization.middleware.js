@@ -51,6 +51,8 @@ const isAuthorized = async function (req, res, next) {
 				{
 					email: decodedRefreshToken.email,
 					user_id: decodedRefreshToken.user_id,
+					firstName: decodedRefreshToken.firstName,
+					lastName: decodedRefreshToken.lastName,
 					date: Date.now(),
 				},
 				process.env.ACCESS_TOKEN_SECRET,
