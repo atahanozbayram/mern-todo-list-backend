@@ -122,7 +122,11 @@ const routes = function () {
 				});
 			})
 			.catch((err) => {
-				res.status(400).send(err);
+				res.status(400).json({
+					errors: Object.entries(err.errors).map(([key, value]) => {
+						return { path: key, msg: value.message, kind: value.kind };
+					}),
+				});
 			});
 	};
 
