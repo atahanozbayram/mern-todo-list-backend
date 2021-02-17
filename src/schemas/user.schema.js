@@ -11,6 +11,8 @@ const UserSchema = new Schema({
 });
 
 // UserSchema.plugin(uniqueValidator);
-UserSchema.plugin(uniqueValidator);
+UserSchema.plugin(uniqueValidator, {
+	message: 'Expected email to be unique, {VALUE} is already taken',
+});
 
 module.exports = UserSchema;
