@@ -191,7 +191,14 @@ const routes = function () {
 					httpOnly: false,
 					secure: true,
 				})
-				.json({ msg: 'logged in successfully.' });
+				.json({
+					msg: 'logged in successfully.',
+					user: {
+						firstName: user.firstName,
+						lastName: user.lastName,
+						email: user.email,
+					},
+				});
 		});
 	};
 
