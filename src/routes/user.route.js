@@ -163,9 +163,6 @@ const routes = function () {
 				return;
 			}
 
-			const auth_host = process.env.AUTH_SERVER_HOST || 'http://localhost';
-			const auth_port = process.env.AUTH_SERVER_PORT || 5000;
-
 			axiosAuthInstance({
 				method: 'POST',
 				url: 'refreshToken/request',
@@ -175,6 +172,8 @@ const routes = function () {
 				},
 			})
 				.then((axiosRes) => {
+					// TODO: delete this on the next commit
+					console.log('refreshToken: %o', axiosRes.data.refreshToken);
 					res
 						.status(200)
 						.cookie('refreshToken', axiosRes.data.refreshToken, {
@@ -190,6 +189,7 @@ const routes = function () {
 								email: user.email,
 							},
 						});
+					return;
 				})
 				.catch((axiosErr) => {
 					console.error('axios error: %o', axiosErr.response.data);
