@@ -6,4 +6,4 @@ const axiosAuthInstance = axios.create({
 	baseURL: `${auth_server_host}/api`,
 });
 
-export { axiosAuthInstance };
+module.exports = { axiosAuthInstance };
