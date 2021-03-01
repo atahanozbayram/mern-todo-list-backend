@@ -180,6 +180,7 @@ const routes = function () {
 							sameSite: 'none',
 							httpOnly: false,
 							secure: true,
+							path: '/',
 						})
 						.json({
 							msg: 'logged in successfully.',
@@ -189,7 +190,6 @@ const routes = function () {
 								email: user.email,
 							},
 						});
-					return;
 				})
 				.catch((axiosErr) => {
 					console.error('axios error: %o', axiosErr.response.data);
