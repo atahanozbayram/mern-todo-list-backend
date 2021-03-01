@@ -179,8 +179,7 @@ const routes = function () {
 						.cookie('refreshToken', axiosRes.data.refreshToken, {
 							sameSite: 'none',
 							httpOnly: false,
-							secure: true,
-							path: '/',
+							secure: false,
 						})
 						.json({
 							msg: 'logged in successfully.',
