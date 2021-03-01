@@ -8,6 +8,7 @@ const UserSchema = require('@root/src/schemas/user.schema');
 const connection = require('@root/db-connection');
 const dynamicValMsg = require('./validation');
 const errorMsgTmp = require('./error');
+const { axiosAuthInstance } = require('@root/src/utils/axiosInstance');
 
 const routes = function () {
 	const userRoute = express.Router();
@@ -165,39 +166,37 @@ const routes = function () {
 			const auth_host = process.env.AUTH_SERVER_HOST || 'http://localhost';
 			const auth_port = process.env.AUTH_SERVER_PORT || 5000;
 
-			// send request to obtain refresh token
-			const axiosRes = await axios({
+			axiosAuthInstance({
 				method: 'POST',
-				baseURL: `${auth_host}:${auth_port}/api`,
 				url: 'refreshToken/request',
 				data: {
 					email: email,
 					password: password,
 				},
-			}).catch((axiosErr) => {
-				console.error(axiosErr);
-				res
-					.status(500)
-					.json({ errors: [{ msg: errorMsgTmp.general.serverSideError() }] });
-				return;
-			});
-
-			if (axiosRes === undefined) return;
-
-			res
-				.status(200)
-				.cookie('refreshToken', axiosRes.data.refreshToken, {
-					sameSite: 'none',
-					httpOnly: false,
-					secure: true,
+			})
+				.then((axiosRes) => {
+					res
+						.status(200)
+						.cookie('refreshToken', axiosRes.data.refreshToken, {
+							sameSite: 'none',
+							httpOnly: false,
+							secure: true,
+						})
+						.json({
+							msg: 'logged in successfully.',
+							user: {
+								firstName: user.firstName,
+								lastName: user.lastName,
+								email: user.email,
+							},
+						});
 				})
-				.json({
-					msg: 'logged in successfully.',
-					user: {
-						firstName: user.firstName,
-						lastName: user.lastName,
-						email: user.email,
-					},
+				.catch((axiosErr) => {
+					console.error('axios error: %o', axiosErr.response.data);
+					res
+						.status(500)
+						.json({ errors: [{ msg: errorMsgTmp.general.serverSideError() }] });
+					return;
 				});
 		});
 	};
@@ -217,31 +216,27 @@ const routes = function () {
 			return;
 		}
 
-		const auth_server_host =
-			process.env.AUTH_SERVER_HOST || 'http://localhost:5000';
-
-		const axiosRes = await axios({
+		axiosAuthInstance({
 			method: 'DELETE',
-			baseURL: `${auth_server_host}/api`,
 			url: '/refreshToken/delete',
 			data: {
 				token: req.cookies.refreshToken,
 				logoutAll: req.body.logoutAll,
 			},
-		}).catch((axiosErr) => {
-			console.error(axiosErr);
-			res
-				.status(500)
-				.json({ msg: 'auth server error.', data: axiosErr.response.data });
-			return;
-		});
-
-		if (axiosRes === undefined) return;
-
-		res
-			.status(200)
-			.clearCookie('refreshToken')
-			.json({ msg: 'logged out successfully.', data: axiosRes.data });
+		})
+			.then((axiosRes) => {
+				res
+					.status(200)
+					.clearCookie('refreshToken')
+					.json({ msg: 'loggout out successfully.', data: axiosRes.data });
+			})
+			.catch((axiosErr) => {
+				console.error('axiosErr: %o', axiosErr.response.data);
+				res
+					.status(500)
+					.json({ msg: 'auth server error.', data: axiosErr.response.data });
+				return;
+			});
 	};
 
 	userRoute.post('/register', validations.register, exp.register);
