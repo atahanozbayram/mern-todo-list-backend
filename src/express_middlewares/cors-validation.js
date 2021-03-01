@@ -3,6 +3,7 @@ const OriginSchema = require('@root/src/schemas/origin.schema');
 const connection = require('@root/db-connection');
 
 const CorsValidation = function (origin, callback) {
+	console.log('request origin: ', origin);
 	const OriginModel = connection.model('Origin', OriginSchema);
 
 	OriginModel.findOne({ url: origin }, function (err, doc) {
