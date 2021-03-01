@@ -6,8 +6,8 @@ const DB_SERVER_PORT = process.env.DB_SERVER_PORT || 27017;
 const DB_NAME = process.env.DB_NAME || '';
 const DB_USER = process.env.DB_USER || '';
 const DB_PASS = process.env.DB_PASS || '';
-const connectionString = DB_USER
-	? `mongodb://${DB_USER}:${DB_PASS}@${DB_SERVER_HOST}:${DB_SERVER_PORT}/${DB_NAME}`
+const connectionString = process.env.DB_CONNECTION_STRING
+	? process.env.DB_CONNECTION_STRING
 	: `mongodb://${DB_SERVER_HOST}:${DB_SERVER_PORT}/${DB_NAME}`;
 
 const connection = mongoose.createConnection(connectionString, {
