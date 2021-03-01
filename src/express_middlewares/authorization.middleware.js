@@ -30,9 +30,11 @@ const isAuthorized = async function (req, res, next) {
 
 	if (validAccess === false && refreshToken) {
 		// check for validity of refreshToken
+		const auth_server_host =
+			process.env.AUTH_SERVER_HOST || 'http://localhost:5000/api';
 		const axiosRes = await axios({
 			method: 'GET',
-			baseURL: process.env.AUTH_SERVER_IP || 'http://localhost:5000/api',
+			baseURL: `${auth_server_host}/api`,
 			url: 'refreshToken/validate',
 			data: {
 				token: refreshToken,
