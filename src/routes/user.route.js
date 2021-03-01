@@ -217,12 +217,12 @@ const routes = function () {
 			return;
 		}
 
-		const auth_host = process.env.AUTH_SERVER_HOST || 'http://localhost';
-		const auth_port = process.env.AUTH_SERVER_PORT || 5000;
+		const auth_server_host =
+			process.env.AUTH_SERVER_HOST || 'http://localhost:5000';
 
 		const axiosRes = await axios({
 			method: 'DELETE',
-			baseURL: `${auth_host}:${auth_port}/api`,
+			baseURL: `${auth_server_host}/api`,
 			url: '/refreshToken/delete',
 			data: {
 				token: req.cookies.refreshToken,
