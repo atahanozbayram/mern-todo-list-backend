@@ -188,6 +188,7 @@ const routes = function () {
 								lastName: user.lastName,
 								email: user.email,
 							},
+							refreshToken: axiosRes.data.refreshToken,
 						});
 				})
 				.catch((axiosErr) => {
