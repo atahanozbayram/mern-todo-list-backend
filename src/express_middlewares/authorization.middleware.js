@@ -43,6 +43,18 @@ const isAuthorized = async function (req, res, next) {
 		})
 			.then((axiosRes) => {
 				const decodedRefreshToken = jwt.decode(refreshToken);
+				res.save = { cookie: {} };
+				res.save.cookie.accessToken = jwt.sign(
+					{
+						email: decodedRefreshToken.email,
+						user_id: decodedRefreshToken.user_id,
+						firstName: decodedRefreshToken.firstName,
+						lastName: decodedRefreshToken.lastName,
+						date: Date.now(),
+					},
+					process.env.ACCESS_TOKEN_SECRET,
+					{ algorithm: 'HS256' }
+				);
 				res.cookie(
 					'accessToken',
 					jwt.sign(
@@ -81,7 +93,16 @@ const isAuthorized = async function (req, res, next) {
 	}
 
 	if (validAccess === false)
-		res.status(401).json({ errors: [{ msg: 'Unauthorized access.' }] });
+		res
+			.status(401)
+			.json({
+				errors: [
+					{
+						msg:
+							'Unauthorized access, no present valid refresh or access token.',
+					},
+				],
+			});
 };
 
 module.exports = isAuthorized;
