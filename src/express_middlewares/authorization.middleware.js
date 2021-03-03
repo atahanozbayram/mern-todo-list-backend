@@ -86,23 +86,20 @@ const isAuthorized = async function (req, res, next) {
 			})
 			.catch((axiosErr) => {
 				console.error('axiosErr: %o', axiosErr.response.data);
-				res.status(401).json({ errors: [{ msg: 'Unauthorized access' }] });
+				res.status(401).json({ errors: [{ msg: 'Unauthorized access 2.' }] });
 			});
 
 		return;
 	}
 
 	if (validAccess === false)
-		res
-			.status(401)
-			.json({
-				errors: [
-					{
-						msg:
-							'Unauthorized access, no present valid refresh or access token.',
-					},
-				],
-			});
+		res.status(401).json({
+			errors: [
+				{
+					msg: 'Unauthorized access, no present valid refresh or access token.',
+				},
+			],
+		});
 };
 
 module.exports = isAuthorized;
